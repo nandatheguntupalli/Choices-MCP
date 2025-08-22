@@ -4,12 +4,12 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  ToolSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import fetch from "node-fetch";
 import open from "open";
 
-const ADORABLE_BASE_URL = process.env.ADORABLE_BASE_URL || "http://localhost:3000";
+const ADORABLE_BASE_URL =
+  process.env.ADORABLE_BASE_URL || "http://localhost:3000";
 const ADORABLE_API_KEY = process.env.ADORABLE_API_KEY;
 
 if (!ADORABLE_API_KEY) {
@@ -17,22 +17,28 @@ if (!ADORABLE_API_KEY) {
   process.exit(1);
 }
 
-interface ComponentGenerationArgs {
-  description: string;
-  framework?: "react" | "vue" | "angular";
-  styling?: "tailwind" | "css" | "styled-components";
-}
 
-interface SessionStatusArgs {
+
+interface SessionResponse {
   sessionId: string;
+  status: string;
+  galleryUrl: string;
 }
 
-interface SelectComponentArgs {
-  sessionId: string;
-  variationId: string;
+interface SessionStatus {
+  session: {
+    status: string;
+    selectedVariationId?: string;
+  };
+  variations: Array<{
+    id: string;
+    variationIndex: number;
+    code: string;
+    status: string;
+  }>;
 }
 
-class AdorableComponentGeneratorServer {
+class ComponentGeneratorServer {
   private server: Server;
 
   constructor() {
@@ -45,25 +51,26 @@ class AdorableComponentGeneratorServer {
         capabilities: {
           tools: {},
         },
-      }
+      },
     );
 
-    this.setupToolHandlers();
+    this.setupHandlers();
   }
 
-  private setupToolHandlers() {
-    // List available tools
+  private setupHandlers() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
       tools: [
         {
           name: "generate_component",
-          description: "Generate 5 variations of a UI component and open gallery for selection. Waits for user to select their preferred component.",
+          description:
+            "Generate 5 variations of a UI component and open gallery for selection. Waits for user to select their preferred component.",
           inputSchema: {
             type: "object",
             properties: {
               description: {
                 type: "string",
-                description: "Description of the component to generate (e.g., 'pricing cards', 'login form')",
+                description:
+                  "Description of the component to generate (e.g., 'pricing cards', 'login form')",
               },
               framework: {
                 type: "string",
@@ -72,7 +79,7 @@ class AdorableComponentGeneratorServer {
                 default: "react",
               },
               styling: {
-                type: "string", 
+                type: "string",
                 enum: ["tailwind", "css", "styled-components"],
                 description: "Styling approach to use",
                 default: "tailwind",
@@ -84,23 +91,21 @@ class AdorableComponentGeneratorServer {
       ],
     }));
 
-    // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
+      if (name !== "generate_component") {
+        throw new Error(`Unknown tool: ${name}`);
+      }
+
       try {
-        if (name === "generate_component") {
-          return await this.handleGenerateComponent(args as any);
-        } else {
-          throw new Error(`Unknown tool: ${name}`);
-        }
+        return await this.generateComponent(args as any);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         return {
           content: [
             {
               type: "text",
-              text: `❌ Error: ${errorMessage}`,
+              text: `❌ Error: ${error instanceof Error ? error.message : "Unknown error"}`,
             },
           ],
         };
@@ -108,13 +113,12 @@ class AdorableComponentGeneratorServer {
     });
   }
 
-  private async makeApiCall(endpoint: string, options: any = {}) {
-    const url = `${ADORABLE_BASE_URL}${endpoint}`;
-    const response = await fetch(url, {
+  private async apiCall(endpoint: string, options: any = {}) {
+    const response = await fetch(`${ADORABLE_BASE_URL}${endpoint}`, {
       ...options,
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${ADORABLE_API_KEY}`,
+        Authorization: `Bearer ${ADORABLE_API_KEY}`,
         ...(options.headers || {}),
       },
     });
@@ -127,163 +131,132 @@ class AdorableComponentGeneratorServer {
     return response.json();
   }
 
-  private async handleGenerateComponent(args: ComponentGenerationArgs) {
+  private async generateComponent(args: any) {
     const { description, framework = "react", styling = "tailwind" } = args;
 
     if (!description) {
       throw new Error("Description is required");
     }
 
-    console.log(`Generating component: ${description} (${framework}, ${styling})`);
+    console.log(
+      `Generating component: ${description} (${framework}, ${styling})`,
+    );
 
-    try {
-      // Create component generation session
-      const sessionData = await this.makeApiCall("/api/mcp/component-gallery", {
-        method: "POST",
-        body: JSON.stringify({
-          description,
-          framework,
-          styling,
-        }),
-      }) as { sessionId: string; status: string; galleryUrl: string };
+    // Create component generation session
+    const sessionData = (await this.apiCall("/api/mcp/component-gallery", {
+      method: "POST",
+      body: JSON.stringify({ description, framework, styling }),
+    })) as SessionResponse;
 
-      const fullGalleryUrl = `${ADORABLE_BASE_URL}${sessionData.galleryUrl}`;
-      
-      console.log(`Session created: ${sessionData.sessionId}, waiting for user selection...`);
+    const galleryUrl = `${ADORABLE_BASE_URL}${sessionData.galleryUrl}`;
 
-      // Wait for user to select a component
-      const selectedComponent = await this.waitForComponentSelection(sessionData.sessionId, fullGalleryUrl, description, framework);
+    console.log(`Session created: ${sessionData.sessionId}`);
+    console.log(`🌐 Opening gallery: ${galleryUrl}`);
 
-      const styleNames = [
-        "Modern & Minimalist",
-        "Bold & Vibrant", 
-        "Elegant & Professional",
-        "Playful & Colorful",
-        "Clean & Simple"
-      ];
-      const styleName = styleNames[selectedComponent.variationIndex] || `Variation ${selectedComponent.variationIndex + 1}`;
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: `🎉 **Component Selected Successfully!**
-
-**Selected Style:** ${styleName}
-**Framework:** ${framework} with ${styling}
-
-📋 **Component Code:**
-
-\`\`\`${framework === 'vue' ? 'vue' : 'tsx'}
-${selectedComponent.code}
-\`\`\`
-
-**Implementation Instructions:**
-1. Copy the code above into your project
-2. Install any required dependencies (typically already in your project) 
-3. Import and use the component in your application
-4. Customize colors, spacing, or content as needed
-
-*The component is ready to use in your ${framework} application!*`,
-          },
-        ],
-      };
-    } catch (error) {
-      console.error("Error in handleGenerateComponent:", error);
-      throw error;
-    }
-  }
-
-  private async waitForComponentSelection(sessionId: string, galleryUrl: string, description: string, framework: string): Promise<{ code: string; variationIndex: number }> {
-    console.log(`Waiting for component selection for session: ${sessionId}`);
-    
-    // Send initial message with gallery link and open browser
-    await new Promise(resolve => {
-      console.log(`🎨 Component Generation Started!
-      
-Gallery URL: ${galleryUrl}
-Session ID: ${sessionId}
-Description: ${description} (${framework})
-
-Generating 5 variations:
-• Modern & Minimalist
-• Bold & Vibrant  
-• Elegant & Professional
-• Playful & Colorful
-• Clean & Simple
-
-🌐 Opening gallery in your browser...`);
-      
-      // Automatically open the gallery in the default browser
-      open(galleryUrl).catch((error) => {
-        console.error(`Failed to open gallery URL automatically: ${error}`);
-        console.log(`Please manually open: ${galleryUrl}`);
-      });
-      
-      // Give user a moment to see the message and browser to open
-      setTimeout(resolve, 2000);
+    // Open gallery in browser
+    open(galleryUrl).catch((error) => {
+      console.error(`Failed to open gallery: ${error}`);
     });
 
-    // Poll for selection (with timeout) - simplified for testing
-    const maxAttempts = 60; // 5 minutes (5 second intervals)
+    // Wait for user selection
+    const selected = await this.waitForSelection(sessionData.sessionId);
+
+    const styleNames = [
+      "Modern & Minimalist",
+      "Bold & Vibrant",
+      "Elegant & Professional",
+      "Playful & Colorful",
+      "Clean & Simple",
+    ];
+
+    const styleName =
+      styleNames[selected.variationIndex] ||
+      `Variation ${selected.variationIndex + 1}`;
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `🎉 **Component Selected: ${styleName}**
+
+📋 **${framework.charAt(0).toUpperCase() + framework.slice(1)} Component Code:**
+
+\`\`\`${framework === "vue" ? "vue" : "tsx"}
+${selected.code}
+\`\`\`
+
+**Implementation:**
+1. Copy the code above into your project
+2. Install dependencies if needed (usually already available)
+3. Import and use the component
+4. Customize as needed
+
+*Ready to use in your ${framework} application!*`,
+        },
+      ],
+    };
+  }
+
+  private async waitForSelection(
+    sessionId: string,
+  ): Promise<{ code: string; variationIndex: number }> {
+    const maxAttempts = 60; // 5 minutes
     const pollInterval = 5000; // 5 seconds
-    
+
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        const sessionStatus = await this.makeApiCall(`/api/mcp/component-gallery/${sessionId}`) as {
-          session: {
-            status: string;
-            selectedVariationId?: string;
-          };
-          variations: Array<{
-            id: string;
-            variationIndex: number;
-            code: string;
-            status: string;
-          }>;
-        };
+        const status = (await this.apiCall(
+          `/api/mcp/component-gallery/${sessionId}`,
+        )) as SessionStatus;
 
-        // Check if user has made a selection
-        if (sessionStatus.session.status === "completed" && sessionStatus.session.selectedVariationId) {
-          const selectedVariation = sessionStatus.variations.find(v => 
-            v.id === sessionStatus.session.selectedVariationId
+        // Check if user selected a component
+        if (
+          status.session.status === "completed" &&
+          status.session.selectedVariationId
+        ) {
+          const selected = status.variations.find(
+            (v) => v.id === status.session.selectedVariationId,
           );
-          
-          if (selectedVariation && selectedVariation.code) {
-            console.log(`Component selected: ${selectedVariation.id}`);
+
+          if (selected?.code) {
+            console.log(
+              `Component selected: variation ${selected.variationIndex}`,
+            );
             return {
-              code: selectedVariation.code,
-              variationIndex: selectedVariation.variationIndex
+              code: selected.code,
+              variationIndex: selected.variationIndex,
             };
           }
         }
 
-        // Log progress less frequently
-        if (attempt % 12 === 0) { // Every 60 seconds
-          console.log(`Waiting for user selection... (attempt ${attempt + 1}/${maxAttempts})`);
+        // Log progress occasionally
+        if (attempt % 12 === 0) {
+          const readyCount = status.variations.filter(
+            (v) => v.status === "ready",
+          ).length;
+          console.log(
+            `Progress: ${readyCount}/5 ready, waiting for selection...`,
+          );
         }
 
-        await new Promise(resolve => setTimeout(resolve, pollInterval));
+        await new Promise((resolve) => setTimeout(resolve, pollInterval));
       } catch (error) {
-        console.error(`Error polling session ${sessionId}:`, error);
-        if (attempt > 5) { // Only throw after a few attempts
-          throw new Error(`Failed to poll session status: ${error}`);
+        if (attempt > 5) {
+          throw new Error(`Failed to poll session: ${error}`);
         }
       }
     }
 
-    throw new Error(`Timeout: No component was selected within 5 minutes. Please try again.`);
+    throw new Error("Timeout: No component selected within 5 minutes");
   }
-
-
 
   async run() {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error("Adorable Component Generator MCP Server running on stdio");
+    console.error("Component Generator MCP Server running");
   }
 }
 
-// Start the server
-const server = new AdorableComponentGeneratorServer();
+// Start server
+const server = new ComponentGeneratorServer();
 server.run().catch(console.error);

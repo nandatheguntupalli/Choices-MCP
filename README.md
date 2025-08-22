@@ -28,7 +28,7 @@ Component Gallery Interface
 1. **Adorable App Running**: The Next.js Adorable app must be running on `http://localhost:3000`
 2. **Database Setup**: PostgreSQL with the extended schema including component generation tables
 3. **Redis Server**: For real-time communication between MCP server and gallery
-4. **API Keys**: 
+4. **API Keys**:
    - Freestyle API key for component generation
    - Adorable API key for authentication
 
@@ -66,7 +66,7 @@ The database schema has been extended with new tables. Run migrations in the Ado
 -- Component Generation Session Status Enum
 CREATE TYPE component_session_status AS ENUM ('pending', 'generating', 'completed', 'selected', 'expired');
 
--- Sandbox Status Enum  
+-- Sandbox Status Enum
 CREATE TYPE sandbox_status AS ENUM ('generating', 'completed', 'failed');
 
 -- Framework Enum
@@ -158,6 +158,7 @@ Generate pricing card components for my React app with Tailwind CSS
 ```
 
 This will:
+
 1. Call the `generate_component` MCP tool
 2. Create a component generation session
 3. Start 5 parallel freestyle sandbox generations
@@ -173,11 +174,13 @@ This will:
 Generates 5 variations of a component and opens the gallery interface.
 
 **Parameters:**
+
 - `description` (required): Description of the component (e.g., "pricing cards", "login form")
 - `framework` (optional): 'react' | 'vue' | 'angular' (default: 'react')
 - `styling` (optional): 'tailwind' | 'css' | 'styled-components' (default: 'tailwind')
 
 **Returns:**
+
 - `sessionId`: Unique session identifier
 - `galleryUrl`: URL to the component gallery
 - `status`: 'created'
@@ -187,10 +190,12 @@ Generates 5 variations of a component and opens the gallery interface.
 Selects a component from the gallery and returns its code.
 
 **Parameters:**
+
 - `sessionId` (required): Session ID from generate_component
 - `componentId` (required): ID of the component to select
 
 **Returns:**
+
 - `componentCode`: The complete component code
 - `componentName`: Name of the component
 - `framework`: Framework used
@@ -202,9 +207,11 @@ Selects a component from the gallery and returns its code.
 Checks the status of a component generation session.
 
 **Parameters:**
+
 - `sessionId` (required): Session ID to check
 
 **Returns:**
+
 - `sessionId`: The session ID
 - `status`: Current session status
 - `completedComponents`: Number of completed components
@@ -316,6 +323,7 @@ npm run build
 ### Logs
 
 MCP server logs are output to console and include:
+
 - Session creation and management
 - Component generation progress
 - Real-time broadcasting events

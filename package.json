@@ -1,45 +1,54 @@
 {
-  "name": "@adorable/component-generator-mcp",
+  "name": "adorable-component-generator-mcp",
   "version": "1.0.0",
-  "description": "Standalone MCP server for generating UI components with 5 variations using freestyle sandboxes",
+  "description": "MCP server for generating React UI components with AI-powered gallery selection",
   "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "adorable-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
   "scripts": {
     "build": "tsc",
-    "dev": "tsx src/index.ts",
+    "dev": "tsc && node dist/index.js",
     "start": "node dist/index.js",
-    "test": "jest",
-    "clean": "rm -rf dist"
+    "prepublishOnly": "npm run build",
+    "test": "echo \"No tests yet\" && exit 0"
   },
   "keywords": [
     "mcp",
+    "react",
+    "ui-components",
+    "ai",
     "component-generator",
-    "ui",
-    "freestyle",
-    "adorable"
+    "tailwind",
+    "claude",
+    "cursor"
   ],
-  "author": "Adorable Team",
+  "author": "Operative-Sh",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Operative-Sh/Choices-MCP.git"
+  },
+  "homepage": "https://github.com/Operative-Sh/Choices-MCP#readme",
+  "bugs": {
+    "url": "https://github.com/Operative-Sh/Choices-MCP/issues"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.6.0",
-    "@supabase/supabase-js": "^2.56.0",
-    "@types/node": "^20.0.0",
-    "axios": "^1.7.0",
-    "uuid": "^10.0.0",
-    "ws": "^8.18.0",
-    "zod": "^3.23.0"
+    "node-fetch": "^3.3.2",
+    "open": "^10.2.0"
   },
   "devDependencies": {
-    "@types/uuid": "^10.0.0",
-    "@types/ws": "^8.5.0",
-    "jest": "^29.7.0",
-    "tsx": "^4.7.0",
-    "typescript": "^5.4.0"
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "bin": {
-    "adorable-component-mcp": "./dist/index.js"
   }
 }

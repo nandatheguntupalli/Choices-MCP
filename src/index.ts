@@ -74,8 +74,8 @@ class ComponentGeneratorServer {
               },
               framework: {
                 type: "string",
-                enum: ["react", "vue", "angular"],
-                description: "Frontend framework to use",
+                enum: ["react"],
+                description: "Frontend framework to use (React only)",
                 default: "react",
               },
               styling: {

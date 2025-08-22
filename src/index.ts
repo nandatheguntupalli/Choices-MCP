@@ -179,9 +179,9 @@ class ComponentGeneratorServer {
           type: "text",
           text: `🎉 **Component Selected: ${styleName}**
 
-📋 **${framework.charAt(0).toUpperCase() + framework.slice(1)} Component Code:**
+📋 **React Component Code:**
 
-\`\`\`${framework === "vue" ? "vue" : "tsx"}
+\`\`\`tsx
 ${selected.code}
 \`\`\`
 
@@ -191,7 +191,7 @@ ${selected.code}
 3. Import and use the component
 4. Customize as needed
 
-*Ready to use in your ${framework} application!*`,
+*Ready to use in your React application!*`,
         },
       ],
     };

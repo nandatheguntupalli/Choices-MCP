@@ -1,0 +1,49 @@
+# Source files
+src/
+*.ts
+!*.d.ts
+
+# Development files
+.env
+.env.local
+.env.*.local
+tsconfig.json
+.gitignore
+
+# Build artifacts
+.tsbuildinfo
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output/
+
+# Dependencies (they'll be installed via package.json)
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Test files (if any)
+test/
+tests/
+*.test.js
+*.spec.js

@@ -1,13 +1,43 @@
 {
   "name": "adorable-component-generator-mcp",
   "version": "1.0.0",
-  "description": "MCP server for generating UI components with gallery selection",
+  "description": "MCP server for generating React UI components with AI-powered gallery selection",
   "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "adorable-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc && node dist/index.js",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "keywords": [
+    "mcp",
+    "react",
+    "ui-components",
+    "ai",
+    "component-generator",
+    "tailwind",
+    "claude",
+    "cursor"
+  ],
+  "author": "Operative-Sh",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Operative-Sh/Choices-MCP.git"
+  },
+  "homepage": "https://github.com/Operative-Sh/Choices-MCP#readme",
+  "bugs": {
+    "url": "https://github.com/Operative-Sh/Choices-MCP/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.6.0",

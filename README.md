@@ -4,12 +4,14 @@ An MCP (Model Context Protocol) server for generating React UI components with A
 
 ## Features
 
-- 🎨 **5 Style Variations**: Modern & Minimalist, Bold & Vibrant, Elegant & Professional, Playful & Colorful, Clean & Simple
+- ✨ **5 Enhanced Design Systems**: Production-grade styling with sophisticated color palettes and patterns
 - ⚛️ **React Components**: Generate production-ready React/Next.js components with TypeScript
-- 🎯 **Tailwind CSS**: Built-in support for Tailwind CSS styling
-- 🌐 **Interactive Gallery**: Web-based component preview and selection
-- 🤖 **AI-Powered**: Uses Claude to generate unique, custom components
-- 📦 **Auto-Dependencies**: Automatically installs required npm packages
+- 🎯 **Advanced Tailwind**: Enhanced styling with custom design tokens and animation patterns
+- 🌐 **Interactive Gallery**: Web-based component preview and selection with live previews
+- 🤖 **AI-Powered**: Uses Claude with sophisticated design prompts for professional results
+- 📦 **Auto-Dependencies**: Smart dependency management with performance optimization
+- 🎨 **Professional Aesthetics**: Corporate-grade visual design following modern UI/UX principles
+- 🚀 **Performance Optimized**: Built with accessibility, responsiveness, and speed in mind
 
 ## Installation
 
@@ -112,15 +114,24 @@ npx adorable-component-generator-mcp
 5. **Code Delivery**: The selected component code is returned to Claude/Cursor
 6. **Implementation**: Copy the code into your project and customize as needed
 
-## Component Styles
+## Enhanced Design Systems
 
-Each request generates 5 variations:
+Each request generates 5 sophisticated variations:
 
-- **Modern & Minimalist**: Clean lines, subtle shadows, muted colors
-- **Bold & Vibrant**: Bright colors, gradients, eye-catching design  
-- **Elegant & Professional**: Sophisticated grays, refined typography
-- **Playful & Colorful**: Fun colors, rounded corners, cheerful design
-- **Clean & Simple**: Minimal black and white, focus on functionality
+### 🔷 Modern SaaS Professional
+Clean architecture with sophisticated blues, elegant spacing, and subtle depth. Perfect for B2B products and professional dashboards. Features enterprise-grade visual hierarchy with advanced interaction states.
+
+### ⚡ Neon Signal Flow  
+Electric cyberpunk aesthetics with glowing accents, dark surfaces, and dynamic gradients. Ideal for tech products and gaming interfaces. Includes custom neon glow effects and electric color schemes.
+
+### 🏢 Enterprise Minimalist
+Refined corporate design with neutral palettes, perfect typography, and executive-level polish. Built for enterprise applications with maximum professionalism and clarity.
+
+### 🎨 Creative Studio Vibrant
+Bold artistic expression with vibrant colors, playful interactions, and creative energy. Perfect for design agencies and creative tools. Features rainbow gradients and artistic layouts.
+
+### ⚪ Pure Functional Design
+Ultra-minimal aesthetic focusing on perfect functionality, crystal clarity, and zero visual noise. Ideal for productivity tools with mathematical precision in spacing and typography.
 
 ## Requirements
 

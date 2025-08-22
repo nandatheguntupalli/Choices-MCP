@@ -138,10 +138,6 @@ class ComponentGeneratorServer {
       throw new Error("Description is required");
     }
 
-    console.log(
-      `Generating component: ${description} (${framework}, ${styling})`,
-    );
-
     // Create component generation session
     const sessionData = (await this.apiCall("/api/mcp/component-gallery", {
       method: "POST",
@@ -149,9 +145,6 @@ class ComponentGeneratorServer {
     })) as SessionResponse;
 
     const galleryUrl = `${ADORABLE_BASE_URL}${sessionData.galleryUrl}`;
-
-    console.log(`Session created: ${sessionData.sessionId}`);
-    console.log(`🌐 Opening gallery: ${galleryUrl}`);
 
     // Open gallery in browser
     open(galleryUrl).catch((error) => {
